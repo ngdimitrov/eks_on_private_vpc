@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram name="AWS Architecture" id="fadata-aws">
+    <mxGraphModel dx="4334" dy="3391" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="org-envelope" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#5F5E5A;dashed=1;dashPattern=8 6;fontSize=12;fontColor=#5F5E5A;align=center;verticalAlign=top;spacingTop=10;spacingLeft=20;arcSize=8;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;AWS Organizations — Control Tower + Account Factory for Terraform&lt;/font&gt;" vertex="1">
+          <mxGeometry height="2610" width="1970" x="-250" y="-420" as="geometry" />
+        </mxCell>
+        <mxCell id="mgmt-account" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=12;fontColor=#2C2C2A;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Management account&lt;br&gt;Billing, SCPs&lt;br&gt;Org-wide CloudTrail&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="380" x="-40" y="-250" as="geometry" />
+        </mxCell>
+        <mxCell id="security-account" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=12;fontColor=#2C2C2A;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Security account&lt;br&gt;Log archive, GuardDuty&lt;br&gt;Security Hub aggregator&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="380" x="420" y="-250" as="geometry" />
+        </mxCell>
+        <mxCell id="shared-services" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=12;fontColor=#26215C;align=left;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Shared Services account&lt;br&gt;ECR, CI/CD, Route 53, ACM&lt;br&gt;Transit Gateway hub&lt;/font&gt;" vertex="1">
+          <mxGeometry height="340" width="600" x="1030" y="-360" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#CECBF6;strokeColor=#534AB7;fontSize=12;fontColor=#26215C;fontStyle=1;align=center;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Transit Gateway&lt;br&gt;&lt;br&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="180" width="250" x="1350" y="-260" as="geometry" />
+        </mxCell>
+        <mxCell id="prod-ou-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#185FA5;fontStyle=2;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Production OU — one isolated AWS account per client&lt;/font&gt;" vertex="1">
+          <mxGeometry height="20" width="600" x="80" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="client-a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#185FA5;dashed=1;dashPattern=8 4;fontSize=13;fontColor=#185FA5;fontStyle=1;align=left;verticalAlign=top;spacingTop=10;spacingLeft=15;arcSize=4;" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;Client A account&lt;br&gt;VPC 10.10.0.0/16 — eu-central-1&lt;/font&gt;" vertex="1">
+          <mxGeometry height="1430" width="1240" x="-150" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="igw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=12;fontColor=#2C2C2A;fontStyle=1;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Internet Gateway&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="250" x="360" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="igw-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#5F5E5A;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;← inbound from internet (HTTPS)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="55" width="290" x="630" y="407.5" as="geometry" />
+        </mxCell>
+        <mxCell id="alb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=12;fontColor=#04342C;fontStyle=1;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Application Load Balancer (multi-AZ, ACM TLS termination, AWS WAF attached)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="730" x="120" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="public-strip" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#1D9E75;dashed=1;dashPattern=4 3;fontSize=11;fontColor=#1D9E75;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;arcSize=4;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Public subnets&lt;/font&gt;" vertex="1">
+          <mxGeometry height="170" width="870" x="50" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="public-a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#1D9E75;fontSize=12;fontColor=#04342C;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AZ-a — 10.10.1.0/24&lt;br&gt;NAT Gateway A (Elastic IP)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="340" x="80" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="public-b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#1D9E75;fontSize=12;fontColor=#04342C;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AZ-b — 10.10.2.0/24&lt;br&gt;NAT Gateway B (Elastic IP)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="340" x="510" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="app-strip" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#534AB7;dashed=1;dashPattern=4 3;fontSize=11;fontColor=#534AB7;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;arcSize=4;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Private subnets — app tier (route 0.0.0.0/0 → NAT, 10.10.0.0/16 → local)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="360" width="870" x="50" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="eks-a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=12;fontColor=#26215C;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;EKS nodes (AZ-a)&lt;br&gt;10.10.11.0/24&lt;br&gt;Java app pods, HPA&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="340" x="110" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="eks-b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=12;fontColor=#26215C;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;EKS nodes (AZ-b)&lt;br&gt;10.10.12.0/24&lt;br&gt;Java app pods, HPA&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="350" x="480" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="eks-control" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=12;fontColor=#2C2C2A;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;EKS control plane (private endpoint, IRSA for pod IAM)&lt;br&gt;VPC interface endpoints: ECR, KMS, Secrets Manager, STS, SSM, CloudWatch Logs&lt;br&gt;Gateway endpoints: S3&lt;/font&gt;" vertex="1">
+          <mxGeometry height="140" width="720" x="110" y="1048" as="geometry" />
+        </mxCell>
+        <mxCell id="data-strip" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#BA7517;dashed=1;dashPattern=4 3;fontSize=11;fontColor=#BA7517;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;arcSize=4;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Data subnets — no internet route (10.10.0.0/16 → local only)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="230" width="870" x="50" y="1227.5" as="geometry" />
+        </mxCell>
+        <mxCell id="rds-primary" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAEEDA;strokeColor=#BA7517;fontSize=12;fontColor=#412402;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;RDS PostgreSQL primary (AZ-a)&lt;br&gt;10.10.21.0/24&lt;br&gt;Multi-AZ, KMS-encrypted, per-client CMK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="122.5" width="355" x="80" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="rds-standby" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAEEDA;strokeColor=#BA7517;fontSize=12;fontColor=#412402;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;RDS PostgreSQL standby (AZ-b)&lt;br&gt;10.10.22.0/24&lt;br&gt;Sync replication, auto-failover&lt;/font&gt;" vertex="1">
+          <mxGeometry height="122.5" width="345" x="535" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="rds-sync" edge="1" parent="1" source="rds-primary" style="endArrow=classic;html=1;rounded=0;startArrow=classic;strokeColor=#BA7517;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="rds-standby">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rds-sync-label" parent="1" style="text;html=1;strokeColor=none;fillColor=#FAEEDA;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#412402;" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;sync&lt;/font&gt;" vertex="1">
+          <mxGeometry height="18" width="40" x="465" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="security-summary" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;dashed=1;dashPattern=2 2;fontSize=11;fontColor=#042C53;align=left;verticalAlign=top;spacingTop=10;spacingLeft=15;arcSize=4;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Security &amp;amp; routing summary&lt;br&gt;&lt;br&gt;Public RT: 0.0.0.0/0 → IGW&lt;br&gt;App RT: 0.0.0.0/0 → NAT (per-AZ); 10.10.0.0/16 → local&lt;br&gt;Data RT: local only — no NAT, no IGW&lt;br&gt;Security groups (by SG-ID, never CIDR): ALB→nodes:8080 | nodes→RDS:5432 | RDS deny outbound&lt;br&gt;Secrets via IRSA + AWS Secrets Manager, per-client KMS CMK, 30-day auto-rotation&lt;br&gt;VPC Flow Logs → S3 | CloudTrail → Security account | GuardDuty enabled&lt;/font&gt;" vertex="1">
+          <mxGeometry height="250" width="865" x="47.5" y="1510" as="geometry" />
+        </mxCell>
+        <mxCell id="igw-to-alb" edge="1" parent="1" source="igw" style="endArrow=classic;html=1;rounded=0;strokeColor=#0F6E56;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="alb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="alb-to-eks-a" edge="1" parent="1" source="alb" style="endArrow=classic;html=1;rounded=0;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 2;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="eks-a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="alb-to-eks-b" edge="1" parent="1" source="alb" style="endArrow=classic;html=1;rounded=0;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 2;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="eks-b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eks-a-to-rds" edge="1" parent="1" source="eks-a" style="endArrow=classic;html=1;rounded=0;strokeColor=#BA7517;strokeWidth=1;dashed=1;dashPattern=4 2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rds-primary">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eks-b-to-rds" edge="1" parent="1" source="eks-b" style="endArrow=classic;html=1;rounded=0;strokeColor=#BA7517;strokeWidth=1;dashed=1;dashPattern=4 2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rds-standby">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="client-b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;dashed=1;dashPattern=8 4;fontSize=12;fontColor=#042C53;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Client B account&lt;br&gt;VPC 10.11.0.0/16&lt;br&gt;&lt;br&gt;Same topology as Client A:&lt;br&gt;VPC + ALB + EKS + RDS&lt;br&gt;Dedicated KMS keys&lt;br&gt;Provisioned via Terraform&lt;/font&gt;" vertex="1">
+          <mxGeometry height="270" width="390" x="1140" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="client-n" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#185FA5;dashed=1;dashPattern=4 4;fontSize=12;fontColor=#185FA5;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Client N account&lt;br&gt;VPC 10.1N.0.0/16&lt;br&gt;&lt;br&gt;New client = new account&lt;br&gt;via Account Factory + IaC&lt;/font&gt;" vertex="1">
+          <mxGeometry height="170" width="390" x="1150" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="rd-account" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;dashed=1;dashPattern=8 4;fontSize=12;fontColor=#04342C;align=center;verticalAlign=middle;arcSize=8;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;R&amp;amp;D account (Non-production OU)&lt;br&gt;VPC 10.20.0.0/16&lt;br&gt;&lt;br&gt;Engineering + QA environments&lt;br&gt;No IAM or network path to production&lt;br&gt;SCPs: region restrictions, instance type limits&lt;/font&gt;" vertex="1">
+          <mxGeometry height="220" width="410" x="1150" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw-legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;dashed=1;dashPattern=2 2;fontSize=11;fontColor=#2C2C2A;align=left;verticalAlign=top;spacingTop=12;spacingLeft=15;arcSize=4;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Transit Gateway connectivity&lt;br&gt;&lt;br&gt;Allowed flows (hub-and-spoke):&lt;br&gt;→ ECR image pulls (ArgoCD)&lt;br&gt;→ Logs / metrics export to Security account&lt;br&gt;→ Cross-account IAM (break-glass, audit)&lt;br&gt;&lt;br&gt;Blocked:&lt;br&gt;× Client A ↔ Client B (no client-to-client routing)&lt;br&gt;× Customer traffic (uses public ALB)&lt;br&gt;&lt;br&gt;VPN / Direct Connect for a specific client&lt;br&gt;attaches to that client&#39;s VPC directly,&lt;br&gt;not via the shared TGW.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="405" width="390" x="1160" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="onboarding-legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;dashed=1;dashPattern=2 2;fontSize=11;fontColor=#2C2C2A;align=left;verticalAlign=top;spacingTop=12;spacingLeft=15;arcSize=4;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;New client onboarding (target state)&lt;br&gt;&lt;br&gt;1. Account Factory for Terraform creates the account&lt;br&gt;     under Production OU + applies baseline (CloudTrail,&lt;br&gt;     Config, GuardDuty, SCPs, IAM)&lt;br&gt;2. Terraform provisions VPC, subnets, route tables,&lt;br&gt;     NAT GWs, IGW, VPC endpoints, TGW attachment,&lt;br&gt;     EKS cluster, RDS Multi-AZ, KMS keys&lt;br&gt;3. CI/CD bootstraps base Helm charts via ArgoCD&lt;br&gt;     (ingress, cert-manager, External Secrets, monitoring)&lt;br&gt;4. DNS, ACM certs&lt;br&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="315" width="810" x="12.5" y="1850" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw-to-client-a" edge="1" parent="1" source="tgw" style="endArrow=classic;html=1;rounded=1;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 3;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="client-a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw-to-client-b" edge="1" parent="1" source="tgw" style="endArrow=classic;html=1;rounded=0;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="client-b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw-to-client-n" edge="1" parent="1" source="tgw" style="endArrow=classic;html=1;rounded=1;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" target="client-n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tgw-to-rd" edge="1" parent="1" source="tgw" style="endArrow=classic;html=1;rounded=1;strokeColor=#534AB7;strokeWidth=1;dashed=1;dashPattern=4 3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;curved=1;" target="rd-account">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1600" y="150" />
+              <mxPoint x="1610" y="460" />
+              <mxPoint x="1560" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rationale-panel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#5F5E5A;fontSize=13;fontColor=#185FA5;fontStyle=1;align=left;verticalAlign=top;spacingTop=12;spacingLeft=20;arcSize=4;" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;Design rationale — why multi-account?&lt;/font&gt;" vertex="1">
+          <mxGeometry height="290" width="1020" x="-150" y="-30" as="geometry" />
+        </mxCell>
+        <mxCell id="rationale-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#5F5E5A;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;→ AWS account = strongest IAM boundary (default-deny across accounts)&lt;br&gt;→ Blast radius bounded: incident in client A cannot affect client B&lt;br&gt;→ Per-account quotas: neighbor cannot exhaust shared limits&lt;br&gt;→ Per-client cost attribution is automatic via Cost Explorer &lt;br&gt;→ SCPs at OU level enforce compliance org-wide (deny disabling CloudTrail, deny public S3, region locks)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="180" width="960" x="-120" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="U-O0wXyvfkLnDYcK89XF-8" edge="1" parent="1" source="app-strip" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.003;entryY=0.539;entryDx=0;entryDy=0;entryPerimeter=0;" target="app-strip">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
