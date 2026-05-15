@@ -9,7 +9,7 @@ Terraform stack for an EKS cluster with control plane and workers in private sub
 
 - Terraform `>= 1.10` (`use_lockfile` for native S3 state locking)
 - AWS CLI `>= 2.13` + [Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
-- AWS credentials with rights to create VPC, EKS, IAM, KMS, EC2, SSM (e.g. `AdministratorAccess` on a dedicated demo account). See [Credentials & secrets](#credentials--secrets) for what I would do differently in production.
+- AWS credentials with rights to create VPC, EKS, IAM, KMS, EC2, SSM — recommended via **IAM Identity Center (SSO)** with an `AdministratorAccess` permission set on a dedicated demo account (4h session, no long-lived keys on disk). Standard SDK chain (`AWS_PROFILE` / env vars) also works. See [Credentials & secrets](#credentials--secrets).
 - Region: `eu-west-1` by default (override in `terraform.tfvars`)
 
 ## Deploy
@@ -67,16 +67,18 @@ Nothing about credentials or secrets is stored in the repo. The deployment uses 
 
 ### What this take-home does
 
-A standard SDK credential chain — `~/.aws/credentials` / `AWS_PROFILE` / env vars — with an IAM user that has `AdministratorAccess` on a **dedicated demo account**. This keeps reviewer setup to "paste two keys, run `terraform apply`" without any extra federation configuration.
+**IAM Identity Center (SSO)** with an `AdministratorAccess` permission set on a dedicated demo account. Daily flow is `aws sso login --sso-session <name>` → 4h STS session cached under `~/.aws/sso/cache/` → Terraform / kubectl / SDKs pick it up transparently via `AWS_PROFILE`. No long-lived keys on disk, MFA enforced at SSO login, sessions expire automatically.
+
+Reviewers without SSO can still use the standard SDK credential chain (`~/.aws/credentials` / env vars) — the Terraform code is auth-mechanism agnostic.
 
 ### What I would do for production
 
-I would not use `AdministratorAccess` or long-lived keys on disk for any account that holds real workloads or data. The AWS-recommended path is **IAM Identity Center (SSO)** — short-lived (1–12 h) STS sessions backed by a least-privilege permission set, no keys on disk to rotate. The starter artifacts for that switch are in this repo:
+Two further tightenings beyond what's here:
 
-- [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) — least-privilege permissions policy for this stack (VPC + EKS + IAM + KMS + Logs + SSM + scoped S3 for state). Roughly 90% narrower than `AdministratorAccess`; no Organizations / Billing / Account / cross-service IAM Identity Center reach.
-- [`docs/iam/deploy-role-trust-policy.json`](docs/iam/deploy-role-trust-policy.json) — trust policy for an assume-role pattern with MFA enforcement (`aws:MultiFactorAuthPresent=true`), for environments where SSO isn't available.
-
-For CI I would similarly use **GitHub OIDC federation** (no long-lived secret keys in GitHub Actions secrets) with `aws-actions/configure-aws-credentials@v4` and `role-to-assume`. This repo's CI is static-analysis only and needs no AWS access, but the pattern is the same when live `terraform plan` jobs are added.
+- **Least-privilege permission set** instead of `AdministratorAccess`. Starter artifacts:
+  - [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) — least-privilege permissions policy for this stack (VPC + EKS + IAM + KMS + Logs + SSM + scoped S3 for state). Roughly 90% narrower than `AdministratorAccess`; no Organizations / Billing / Account / cross-service IAM Identity Center reach.
+  - [`docs/iam/deploy-role-trust-policy.json`](docs/iam/deploy-role-trust-policy.json) — trust policy for an assume-role pattern with MFA enforcement (`aws:MultiFactorAuthPresent=true`), for environments where SSO isn't available.
+- **GitHub OIDC federation for CI** with `aws-actions/configure-aws-credentials@v4` and `role-to-assume` — no long-lived secret keys in GitHub Actions secrets. This repo's CI is static-analysis only today, but the pattern is the same when live `terraform plan` / `apply` jobs are added.
 
 ### Other credential boundaries in the stack
 
