@@ -1,0 +1,74 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identity",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadOnlyDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "ec2:Get*",
+        "eks:Describe*",
+        "eks:List*",
+        "iam:Get*",
+        "iam:List*",
+        "kms:Describe*",
+        "kms:Get*",
+        "kms:List*",
+        "logs:Describe*",
+        "logs:ListTagsForResource",
+        "logs:ListTagsLogGroup",
+        "ssm:DescribeParameters",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "ssm:ListTagsForResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SsmPublicAmiLookup",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ],
+      "Resource": "arn:aws:ssm:*::parameter/aws/service/*"
+    },
+    {
+      "Sid": "StateBucketReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketAcl",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetBucketLocation",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketVersioning",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:ListBucket",
+        "s3:ListBucketVersions"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*-tfstate-*",
+        "arn:aws:s3:::*-tfstate-*/*"
+      ]
+    },
+    {
+      "Sid": "StateKmsDecrypt",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "kms:ViaService": "s3.*.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
