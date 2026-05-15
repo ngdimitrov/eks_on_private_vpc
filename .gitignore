@@ -44,3 +44,6 @@ Thumbs.db
 # Local logs and scratch
 *.log
 .scratch/
+
+# Claude Code local config
+.claude/

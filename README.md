@@ -82,10 +82,14 @@ Daily flow: `aws sso login --sso-session <name>` → 4h STS session cached under
 
 Reviewers without SSO can still use the standard SDK credential chain (`~/.aws/credentials` / env vars) — the Terraform code is auth-mechanism agnostic.
 
+### CI/CD — GitHub OIDC, no static keys
+
+`terraform plan` runs on every PR (read-only role) and `terraform apply` runs on push to `main` behind a required-reviewer GitHub Environment, both via GitHub OIDC federation — zero long-lived keys in GitHub. The OIDC provider and the two repo-pinned roles are themselves IaC in [`terraform/bootstrap/`](terraform/bootstrap); role policies are sourced from the same [`docs/iam/`](docs/iam) JSON used for the SSO permission set. Full design and setup: [`docs/cicd.md`](docs/cicd.md).
+
 ### What I would do for production
 
-- **GitHub OIDC federation for CI** with `aws-actions/configure-aws-credentials@v4` and `role-to-assume` — no long-lived secret keys in GitHub Actions secrets. This repo's CI is static-analysis only today, but the pattern is the same when live `terraform plan` / `apply` jobs are added.
 - **Separate AWS accounts per environment** under AWS Organizations (dev / stage / prod), with the same permission set materialized in each. Blast radius of any deploy stays inside one account.
+- **Permissions boundary** on the CI apply role so a compromised pipeline cannot escalate by creating roles with broader policies than the boundary allows.
 
 ### Other credential boundaries in the stack
 
@@ -94,9 +98,9 @@ Reviewers without SSO can still use the standard SDK credential chain (`~/.aws/c
 - **Bastion access** — SSM Session Manager only. No SSH keys are generated, no inbound ports, no public IP. The bastion's IAM role has `AmazonSSMManagedInstanceCore` plus a narrow inline policy (`eks:DescribeCluster`, `ssm:GetParameter*` on `/<cluster>/bootstrap/*`, `kms:Decrypt` on `alias/aws/ssm`).
 - **Bootstrap parameters** (LB Controller role ARN, VPC ID) — published by Terraform to SSM Parameter Store as `SecureString` and read by `scripts/bootstrap-bastion.sh`. No copy-paste between machines.
 - **Kubernetes secrets** — envelope-encrypted with a customer-managed KMS key. The key policy grants `kms:*` only to the account root + CloudWatch Logs service (scoped via `kms:EncryptionContext`).
-- **Terraform state** — stored in S3 (`AES256` server-side encryption, versioning ON, public access blocked) with native `use_lockfile` locking. The state contains resource attributes (some sensitive) so the bucket is locked down by default; rotate state-bucket access through IAM, not through bucket policies.
+- **Terraform state** — stored in S3 with **SSE-KMS** (customer-managed key, rotation on), versioning ON, public access blocked, a bucket policy denying non-TLS access, and native `use_lockfile` locking. The state contains resource attributes (some sensitive); rotate state-bucket access through IAM, not bucket policies.
 - **Secret rotation** — no static secrets exist in this stack: SSO/STS short-lived credentials for humans; IRSA short-lived tokens for pods; SSM agent uses temporary credentials from the instance role. KMS key rotation is enabled.
-- **CI** — the workflow needs no AWS credentials (all jobs are static analysis only). If you add live-plan jobs, use OIDC federation (`aws-actions/configure-aws-credentials@v4` with `role-to-assume`) instead of long-lived secret keys.
+- **CI/CD ↔ AWS** — GitHub OIDC federation, no static keys in GitHub. Static-analysis jobs (`ci.yml`) need no AWS access; the `cd.yml` plan/apply jobs assume repo-pinned, `sub`-scoped roles for the duration of one job. See [`docs/cicd.md`](docs/cicd.md).
 
 ## Bonus — VPC endpoints
 
@@ -126,8 +130,8 @@ All interface endpoints sit in both private subnets behind an SG that accepts `t
 
 ## How this addresses the evaluation criteria
 
-- **Correctness** — All requirements covered; full deploy + nginx-on-internal-NLB validated end-to-end on AWS. CI re-runs static checks on every commit.
+- **Correctness** — All requirements covered; full deploy + nginx-on-internal-NLB validated end-to-end on AWS. CI re-runs fmt/validate/tflint on every commit; checkov **hard-fails on HIGH/CRITICAL** and tfsec hard-fails at `--minimum-severity HIGH` (lower-severity by-design items stay reported but non-blocking).
 - **Code structure** — Four submodules (`vpc`, `vpc-endpoints`, `eks`, `bastion`), each with its own `versions.tf` and a narrow input/output interface. The `eks` module is split by concern (`cluster.tf`, `iam.tf`, `oidc.tf`, `security-groups.tf`, `node-group.tf`, `access-entries.tf`).
-- **Security defaults** — Private subnets have `map_public_ip_on_launch = false`, node group has no `remote_access`, EKS API is private, IMDSv2 required, KMS-encrypted secrets + CW logs, custom node SG with explicit minimal rules, locked-down default VPC SG, IRSA scoped to one ServiceAccount, modern EKS access entries (no `aws-auth` ConfigMap).
+- **Security defaults** — Both public and private subnets have `map_public_ip_on_launch = false` (nothing launches in public — NAT uses an EIP), node group has no `remote_access`, EKS API is private, IMDSv2 required with **node IMDS hop limit 1** (pods can't steal the node role — they must use IRSA), KMS-encrypted secrets + CW logs, **VPC Flow Logs** (ALL traffic, KMS-encrypted CW group), node SG egress scoped to **443 + in-VPC** (no all-protocol `0.0.0.0/0`), control-plane logs include `api/audit/authenticator/controllerManager/scheduler`, locked-down default VPC SG, IRSA scoped to one ServiceAccount, modern EKS access entries (no `aws-auth` ConfigMap).
 - **README quality** — This file. Reviewer's path is: install prerequisites → `terraform apply` → SSM in → run one script → see `Validation complete.`
 - **Bonus VPC endpoints** — All four required services + the two SSM data-plane endpoints needed for `aws ssm start-session` to work without internet. SG tightly scoped to VPC CIDR.
