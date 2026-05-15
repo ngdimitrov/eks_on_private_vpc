@@ -13,6 +13,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "vpc_cidr_block" {
+  description = "VPC CIDR — node SG egress is scoped to this range plus TCP 443 for image pulls / AWS APIs."
+  type        = string
+}
+
 variable "private_subnet_ids" {
   description = "Private subnet IDs for the control plane ENIs and the managed node group."
   type        = list(string)

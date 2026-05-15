@@ -42,6 +42,7 @@ module "eks" {
   cluster_name        = var.cluster_name
   kubernetes_version  = var.kubernetes_version
   vpc_id              = module.vpc.vpc_id
+  vpc_cidr_block      = module.vpc.vpc_cidr_block
   private_subnet_ids  = module.vpc.private_subnet_ids
   node_instance_types = var.node_instance_types
   node_desired_size   = var.node_desired_size

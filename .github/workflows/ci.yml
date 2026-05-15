@@ -69,7 +69,11 @@ jobs:
           directory: terraform
           framework: terraform
           quiet: true
-          soft_fail: true # findings documented in README; do not block CI
+          # Block the build on HIGH/CRITICAL; lower-severity, by-design items
+          # (single NAT, 7-day KMS window, etc.) are documented in the README
+          # and reported but non-blocking.
+          soft_fail: true
+          hard_fail_on: HIGH,CRITICAL
 
   tfsec:
     name: tfsec
@@ -80,7 +84,8 @@ jobs:
       - uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: terraform
-          soft_fail: true # findings documented in README; do not block CI
+          soft_fail: false
+          additional_args: --minimum-severity HIGH
 
   shellcheck:
     name: shellcheck

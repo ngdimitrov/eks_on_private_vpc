@@ -33,7 +33,9 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
 }
 
 data "aws_iam_policy_document" "inline" {
-  # eks:DescribeCluster does not support resource-level permissions.
+  # eks:DescribeCluster does not support resource-level permissions, so the
+  # wildcard is unavoidable; the action itself is read-only and low-risk.
+  #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
     sid       = "EksDescribeForKubeconfig"
     effect    = "Allow"
