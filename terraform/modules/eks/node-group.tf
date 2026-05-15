@@ -9,10 +9,13 @@ resource "aws_launch_template" "node" {
     local.cluster_primary_sg_id,
   ]
 
+  # hop_limit = 1 stops non-hostNetwork pods from reaching IMDS and stealing
+  # the node role; workloads must use IRSA. host-network components
+  # (kube-proxy, VPC CNI) still get IMDS at hop 1.
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
-    http_put_response_hop_limit = 2 # pods reach IMDS via the host
+    http_put_response_hop_limit = 1
   }
 
   monitoring {

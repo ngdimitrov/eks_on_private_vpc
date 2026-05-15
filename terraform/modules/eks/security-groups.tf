@@ -38,9 +38,21 @@ resource "aws_vpc_security_group_ingress_rule" "node_from_cp_tls" {
   referenced_security_group_id = local.cluster_primary_sg_id
 }
 
-resource "aws_vpc_security_group_egress_rule" "node_all" {
+# Scoped egress instead of all-protocol 0.0.0.0/0: 443 to the internet covers
+# image pulls (public.ecr.aws) and any AWS API not served by a VPC endpoint;
+# everything else (pod/pod, node/control-plane, DNS, kubelet) stays in-VPC.
+resource "aws_vpc_security_group_egress_rule" "node_https" {
   security_group_id = aws_security_group.node.id
-  description       = "All egress (NAT + VPC endpoints)"
-  ip_protocol       = "-1"
+  description       = "HTTPS to AWS APIs / image registries via NAT + VPC endpoints"
+  ip_protocol       = "tcp"
+  from_port         = 443
+  to_port           = 443
   cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "node_vpc_all" {
+  security_group_id = aws_security_group.node.id
+  description       = "All traffic within the VPC (pods, control plane, DNS, kubelet)"
+  ip_protocol       = "-1"
+  cidr_ipv4         = var.vpc_cidr_block
 }

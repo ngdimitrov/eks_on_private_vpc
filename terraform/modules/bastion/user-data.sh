@@ -16,12 +16,22 @@ done
 # AL2023 ships curl-minimal; installing the full curl package conflicts.
 dnf install -y --quiet tar gzip bash-completion jq
 
-curl -fsSL --retry 5 --retry-delay 6 -o /usr/local/bin/kubectl \
-  https://dl.k8s.io/release/v1.35.5/bin/linux/amd64/kubectl
-chmod +x /usr/local/bin/kubectl
+# kubectl pinned + integrity-verified against the official published checksum.
+KUBECTL_VERSION="v1.35.5"
+curl -fsSL --retry 5 --retry-delay 6 -o /tmp/kubectl \
+  "https://dl.k8s.io/release/$${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+curl -fsSL --retry 5 --retry-delay 6 -o /tmp/kubectl.sha256 \
+  "https://dl.k8s.io/release/$${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+echo "$(cat /tmp/kubectl.sha256)  /tmp/kubectl" | sha256sum -c -
+install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+rm -f /tmp/kubectl /tmp/kubectl.sha256
 
-curl -fsSL --retry 5 --retry-delay 6 https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
-  | HELM_INSTALL_DIR=/usr/local/bin USE_SUDO=false bash
+# Helm: pin both the installer script (tagged ref, not mutable main) and the
+# helm version. get-helm-3 verifies the release tarball checksum itself.
+HELM_VERSION="v3.16.3"
+curl -fsSL --retry 5 --retry-delay 6 \
+  "https://raw.githubusercontent.com/helm/helm/$${HELM_VERSION}/scripts/get-helm-3" \
+  | DESIRED_VERSION="$${HELM_VERSION}" HELM_INSTALL_DIR=/usr/local/bin USE_SUDO=false bash
 
 cat > /etc/profile.d/eks.sh <<EOF
 export AWS_REGION=$${REGION}
