@@ -8,7 +8,6 @@ user and no long-lived access key anywhere in the workflow.
 | File | Purpose |
 | --- | --- |
 | [`deploy-policy.json`](deploy-policy.json) | Least-privilege permissions policy — exactly the actions this Terraform stack needs (VPC + EKS + IAM + KMS + Logs + SSM + S3 state scoped via the `*-tfstate-*` ARN pattern). Used as the **inline policy** of the SSO permission set. |
-| [`deploy-role-trust-policy.json`](deploy-role-trust-policy.json) | Trust policy for an `sts:AssumeRole` variant with `aws:MultiFactorAuthPresent=true`, for environments where IAM Identity Center isn't available. |
 
 ## How the SSO permission set was created
 
