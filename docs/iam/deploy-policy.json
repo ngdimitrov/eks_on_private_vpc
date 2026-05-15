@@ -126,6 +126,20 @@
       "Resource": "*"
     },
     {
+      "Sid": "IamServiceLinkedRoles",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": [
+            "eks.amazonaws.com",
+            "eks-nodegroup.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "Kms",
       "Effect": "Allow",
       "Action": [
