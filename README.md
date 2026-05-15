@@ -80,8 +80,6 @@ Nothing about credentials or secrets is stored in the repo. The deployment uses 
 
 Daily flow: `aws sso login --sso-session <name>` → 4h STS session cached under `~/.aws/sso/cache/` → Terraform / kubectl / SDKs pick it up transparently via `AWS_PROFILE`. No long-lived keys on disk, MFA enforced at SSO login, sessions expire automatically.
 
-The companion [`docs/iam/deploy-role-trust-policy.json`](docs/iam/deploy-role-trust-policy.json) is the trust policy for an `sts:AssumeRole` variant with `aws:MultiFactorAuthPresent=true` enforcement, for environments where Identity Center isn't available.
-
 Reviewers without SSO can still use the standard SDK credential chain (`~/.aws/credentials` / env vars) — the Terraform code is auth-mechanism agnostic.
 
 ### What I would do for production
