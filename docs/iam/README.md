@@ -59,3 +59,17 @@ audited against every resource type in `terraform/modules/`, including
 `eks.amazonaws.com` and `eks-nodegroup.amazonaws.com`) which a first-time
 `apply` on a fresh account needs before EKS can materialize its
 service-linked roles.
+
+**Anti-escalation scoping.** Mutating IAM actions (`CreateRole`,
+`PutRolePolicy`, `PassRole`, …) are *not* on `Resource: "*"`. They are scoped
+to the stack's own namespace — `role/eks-private-demo-*`,
+`role/gha-terraform-*` (the CI roles managed by `terraform/bootstrap`),
+`policy/eks-private-demo-*`, `instance-profile/eks-private-demo-*` — and
+`PassRole` additionally requires `iam:PassedToService` ∈ {eks, ec2,
+vpc-flow-logs}. So a compromised CI apply role cannot mint an arbitrary admin
+role and escalate; it can only manage roles inside this stack's prefix.
+`iam:Get*/List*` stay on `*` (read-only, needed broadly by Terraform data
+sources). This couples the policy to the default `cluster_name`
+(`eks-private-demo`); change both together. State access additionally needs
+`kms:Decrypt`/`GenerateDataKey` (scoped via `kms:ViaService = s3.*`) because
+the state bucket is SSE-KMS.
