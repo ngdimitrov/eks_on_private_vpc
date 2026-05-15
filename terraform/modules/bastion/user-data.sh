@@ -17,7 +17,7 @@ done
 dnf install -y --quiet tar gzip bash-completion jq
 
 curl -fsSL --retry 5 --retry-delay 6 -o /usr/local/bin/kubectl \
-  https://dl.k8s.io/release/v1.31.4/bin/linux/amd64/kubectl
+  https://dl.k8s.io/release/v1.35.5/bin/linux/amd64/kubectl
 chmod +x /usr/local/bin/kubectl
 
 curl -fsSL --retry 5 --retry-delay 6 https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
