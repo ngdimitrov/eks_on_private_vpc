@@ -25,7 +25,7 @@ terraform init -backend-config=backend.hcl
 terraform apply         # ~15-20 min (EKS control plane + node group are the slow steps)
 ```
 
-State and lock file live in `s3://<prefix>-tfstate-<account>/eks-on-private-vpc/` — no DynamoDB table needed (Terraform `>= 1.10` `use_lockfile = true`). Defaults: CIDR `10.0.0.0/16`, two AZs, 2 public + 2 private subnets, 1 NAT, 2× `t3.medium` nodes, K8s 1.31. Toggle `enable_vpc_endpoints` / `enable_bastion` in `terraform.tfvars.example` to opt out.
+State and lock file live in `s3://<prefix>-tfstate-<account>/eks-on-private-vpc/` — no DynamoDB table needed (Terraform `>= 1.10` `use_lockfile = true`). Defaults: CIDR `10.0.0.0/16`, two AZs, 2 public + 2 private subnets, 1 NAT, 2× `t3.medium` nodes, K8s 1.35. Toggle `enable_vpc_endpoints` / `enable_bastion` in `terraform.tfvars.example` to opt out.
 
 ## Validate
 
