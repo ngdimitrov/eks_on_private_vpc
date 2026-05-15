@@ -1,0 +1,9 @@
+region             = "eu-west-1"
+github_owner       = "ngdimitrov"
+github_repo        = "eks_on_private_vpc"
+github_environment = "production"
+
+tags = {
+  Owner       = "platform-eng"
+  Environment = "demo"
+}
