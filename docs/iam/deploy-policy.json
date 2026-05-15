@@ -24,6 +24,7 @@
         "ec2:CreateInternetGateway",
         "ec2:CreateLaunchTemplate",
         "ec2:CreateLaunchTemplateVersion",
+        "ec2:CreateFlowLogs",
         "ec2:CreateNatGateway",
         "ec2:CreateRoute",
         "ec2:CreateRouteTable",
@@ -32,6 +33,7 @@
         "ec2:CreateTags",
         "ec2:CreateVpc",
         "ec2:CreateVpcEndpoint",
+        "ec2:DeleteFlowLogs",
         "ec2:DeleteInternetGateway",
         "ec2:DeleteLaunchTemplate",
         "ec2:DeleteLaunchTemplateVersions",
@@ -178,6 +180,7 @@
       "Action": [
         "kms:CancelKeyDeletion",
         "kms:CreateAlias",
+        "kms:CreateGrant",
         "kms:CreateKey",
         "kms:DeleteAlias",
         "kms:Describe*",
@@ -186,6 +189,8 @@
         "kms:Get*",
         "kms:List*",
         "kms:PutKeyPolicy",
+        "kms:RetireGrant",
+        "kms:RevokeGrant",
         "kms:ScheduleKeyDeletion",
         "kms:TagResource",
         "kms:UntagResource",
@@ -267,16 +272,20 @@
       ]
     },
     {
-      "Sid": "StateBucketKms",
+      "Sid": "DataKeyUsageViaS3AndSsm",
       "Effect": "Allow",
       "Action": [
         "kms:Decrypt",
+        "kms:Encrypt",
         "kms:GenerateDataKey"
       ],
       "Resource": "*",
       "Condition": {
         "StringLike": {
-          "kms:ViaService": "s3.*.amazonaws.com"
+          "kms:ViaService": [
+            "s3.*.amazonaws.com",
+            "ssm.*.amazonaws.com"
+          ]
         }
       }
     }
