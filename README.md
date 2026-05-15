@@ -9,7 +9,7 @@ Terraform stack for an EKS cluster with control plane and workers in private sub
 
 - Terraform `>= 1.10` (`use_lockfile` for native S3 state locking)
 - AWS CLI `>= 2.13` + [Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
-- AWS credentials with rights to create VPC, EKS, IAM, KMS, EC2, SSM — recommended via **IAM Identity Center (SSO)** with an `AdministratorAccess` permission set on a dedicated demo account (4h session, no long-lived keys on disk). Standard SDK chain (`AWS_PROFILE` / env vars) also works. See [Credentials & secrets](#credentials--secrets).
+- AWS credentials via **IAM Identity Center (SSO)** with a custom least-privilege permission set sourced from [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) on a dedicated demo account (4h session, no long-lived keys on disk). Standard SDK chain (`AWS_PROFILE` / env vars) also works. See [Credentials & secrets](#credentials--secrets).
 - Region: `eu-west-1` by default (override in `terraform.tfvars`)
 
 ## Deploy
@@ -67,18 +67,18 @@ Nothing about credentials or secrets is stored in the repo. The deployment uses 
 
 ### What this take-home does
 
-**IAM Identity Center (SSO)** with an `AdministratorAccess` permission set on a dedicated demo account. Daily flow is `aws sso login --sso-session <name>` → 4h STS session cached under `~/.aws/sso/cache/` → Terraform / kubectl / SDKs pick it up transparently via `AWS_PROFILE`. No long-lived keys on disk, MFA enforced at SSO login, sessions expire automatically.
+**IAM Identity Center (SSO)** with a custom least-privilege permission set sourced from [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) on a dedicated demo account. The policy is scoped to exactly what this stack provisions (VPC + EKS + IAM + KMS + Logs + SSM + S3 state bucket scoped via the `*-tfstate-*` ARN pattern) — roughly 90% narrower than `AdministratorAccess`, no Organizations / Billing / Account / cross-service Identity Center reach.
+
+Daily flow: `aws sso login --sso-session <name>` → 4h STS session cached under `~/.aws/sso/cache/` → Terraform / kubectl / SDKs pick it up transparently via `AWS_PROFILE`. No long-lived keys on disk, MFA enforced at SSO login, sessions expire automatically.
+
+The companion [`docs/iam/deploy-role-trust-policy.json`](docs/iam/deploy-role-trust-policy.json) is the trust policy for an `sts:AssumeRole` variant with `aws:MultiFactorAuthPresent=true` enforcement, for environments where Identity Center isn't available.
 
 Reviewers without SSO can still use the standard SDK credential chain (`~/.aws/credentials` / env vars) — the Terraform code is auth-mechanism agnostic.
 
 ### What I would do for production
 
-Two further tightenings beyond what's here:
-
-- **Least-privilege permission set** instead of `AdministratorAccess`. Starter artifacts:
-  - [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) — least-privilege permissions policy for this stack (VPC + EKS + IAM + KMS + Logs + SSM + scoped S3 for state). Roughly 90% narrower than `AdministratorAccess`; no Organizations / Billing / Account / cross-service IAM Identity Center reach.
-  - [`docs/iam/deploy-role-trust-policy.json`](docs/iam/deploy-role-trust-policy.json) — trust policy for an assume-role pattern with MFA enforcement (`aws:MultiFactorAuthPresent=true`), for environments where SSO isn't available.
 - **GitHub OIDC federation for CI** with `aws-actions/configure-aws-credentials@v4` and `role-to-assume` — no long-lived secret keys in GitHub Actions secrets. This repo's CI is static-analysis only today, but the pattern is the same when live `terraform plan` / `apply` jobs are added.
+- **Separate AWS accounts per environment** under AWS Organizations (dev / stage / prod), with the same permission set materialized in each. Blast radius of any deploy stays inside one account.
 
 ### Other credential boundaries in the stack
 
