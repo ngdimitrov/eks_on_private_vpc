@@ -15,6 +15,13 @@ Terraform stack for an EKS cluster with control plane and workers in private sub
 ## Deploy
 
 ```bash
+# 0. Authenticate. This project uses IAM Identity Center (SSO) — short-lived
+#    4h STS credentials, no keys on disk. See docs/iam/README.md for how the
+#    least-privilege permission set was created.
+aws sso login --sso-session <your-sso-session>
+export AWS_PROFILE=<your-sso-profile>
+aws sts get-caller-identity   # expect assumed-role/AWSReservedSSO_EksProjectDeployer_*/<you>
+
 # 1. One-time per account: create the S3 bucket that holds the Terraform state
 #    (versioning ON, encrypted, public access blocked, native S3 locking).
 ./scripts/bootstrap-state-bucket.sh
@@ -24,6 +31,8 @@ cd terraform
 terraform init -backend-config=backend.hcl
 terraform apply         # ~15-20 min (EKS control plane + node group are the slow steps)
 ```
+
+> Reviewers without SSO: set `AWS_PROFILE` (or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) to any principal holding the [`docs/iam/deploy-policy.json`](docs/iam/deploy-policy.json) permissions and skip step 0. The Terraform code is auth-mechanism agnostic.
 
 State and lock file live in `s3://<prefix>-tfstate-<account>/eks-on-private-vpc/` — no DynamoDB table needed (Terraform `>= 1.10` `use_lockfile = true`). Defaults: CIDR `10.0.0.0/16`, two AZs, 2 public + 2 private subnets, 1 NAT, 2× `t3.medium` nodes, K8s 1.35. Toggle `enable_vpc_endpoints` / `enable_bastion` in `terraform.tfvars.example` to opt out.
 
