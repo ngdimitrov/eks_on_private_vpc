@@ -24,7 +24,7 @@ spec:
               app: nginx
       containers:
         - name: nginx
-          image: public.ecr.aws/nginx/nginx:1.27
+          image: public.ecr.aws/nginx/nginx:1.30
           ports:
             - containerPort: 80
               name: http

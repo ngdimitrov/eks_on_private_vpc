@@ -12,7 +12,7 @@ on:
 permissions: {}
 
 env:
-  TERRAFORM_VERSION: 1.10.5
+  TERRAFORM_VERSION: 1.15.2
   AWS_REGION: eu-west-1
 
 jobs:

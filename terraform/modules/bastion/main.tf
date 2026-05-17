@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "inline" {
     effect  = "Allow"
     actions = ["ssm:GetParameter", "ssm:GetParameters"]
     resources = [
-      "arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.cluster_name}/bootstrap/*",
+      "arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.cluster_name}/bootstrap/*",
     ]
   }
 
@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "inline" {
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
-      values   = ["ssm.${data.aws_region.current.name}.amazonaws.com"]
+      values   = ["ssm.${data.aws_region.current.region}.amazonaws.com"]
     }
   }
 }
@@ -85,6 +85,10 @@ resource "aws_security_group" "this" {
   tags = merge(var.tags, { Name = "${var.name}-sg" })
 }
 
+# By design: the bastion pulls Helm charts from public chart repos and reaches
+# AWS APIs over HTTPS; those endpoints have no stable, narrow CIDR to pin to.
+# Egress is locked to tcp/443 only. Documented exception (mirrors README).
+#trivy:ignore:AWS-0104
 resource "aws_vpc_security_group_egress_rule" "https" {
   security_group_id = aws_security_group.this.id
   description       = "HTTPS to AWS APIs and Helm chart repo"

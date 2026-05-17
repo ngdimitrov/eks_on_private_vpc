@@ -41,6 +41,10 @@ resource "aws_vpc_security_group_ingress_rule" "node_from_cp_tls" {
 # Scoped egress instead of all-protocol 0.0.0.0/0: 443 to the internet covers
 # image pulls (public.ecr.aws) and any AWS API not served by a VPC endpoint;
 # everything else (pod/pod, node/control-plane, DNS, kubelet) stays in-VPC.
+# By design: nodes reach AWS APIs and public image registries (public.ecr.aws)
+# over HTTPS via NAT; those have no stable, narrow CIDR. Locked to tcp/443.
+# Documented exception (mirrors README).
+#trivy:ignore:AWS-0104
 resource "aws_vpc_security_group_egress_rule" "node_https" {
   security_group_id = aws_security_group.node.id
   description       = "HTTPS to AWS APIs / image registries via NAT + VPC endpoints"
